@@ -5,21 +5,52 @@ var app = express();
 
 app.use(express.json());
 
-app.get("/",(req,res)=>{
-    res.send("GET");
-})
+app.post("/account", (req, res) => {
+    let account = req.body;
+    fs.readFile("account.json", "utf8", (err, data) => {
+        if (!err) {
+            try {
+                let json = JSON.parse(data);
+                account = { id: json.nextId++,...account };
+                json.accounts.push(account);
 
-app.post("/account",(req,res)=>{
-    console.log("post account")
-    let params = req.body;
+                fs.writeFile("account.json", JSON.stringify(json), err => {
+                    if (err) {
+                        console.log(err);
+                    } else {
+                        res.end();
+                    }
+                });
+            } catch (err) {
+                res.send("erro");
+            }
+        } else {
+            res.send("erro na leitura")
+        }
+    });
+});
 
-    fs.writeFile("account.js",JSON.stringify(params),err=>{
-        console.log(err);
-    })
+// iniciando o servidor
 
-    res.send("post account")
-})
+app.listen(3000, () => {
 
-app.listen(3000,()=>{
-    console.log("SERVER")
+    try {
+
+        fs.readFile("account.json", "utf8", (err, data) => {
+            if (err) {
+                const initialJson = {
+                    nextId: 1,
+                    accounts: []
+                };
+                fs.writeFile("account.json", JSON.stringify(initialJson), err => {
+                    console.log(err);
+                })
+            }
+        })
+
+    } catch (err) {
+        console.log(err)
+    }
+
+    console.log("START SERVER")
 })
