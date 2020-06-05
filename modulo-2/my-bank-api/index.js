@@ -16,16 +16,16 @@ app.post("/account", (req, res) => {
 
                 fs.writeFile("account.json", JSON.stringify(json), err => {
                     if (err) {
-                        console.log(err);
+                        res.status(400).send({error: err.message});
                     } else {
                         res.end();
                     }
                 });
             } catch (err) {
-                res.send("erro");
+                res.status(400).send({error: err.message});
             }
         } else {
-            res.send("erro na leitura")
+            res.status(400).send({error: err.message});
         }
     });
 });
