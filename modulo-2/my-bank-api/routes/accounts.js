@@ -40,16 +40,45 @@ router.get("/", (req, res) => {
 });
 
 router.get("/:id", (req, res) => {
-    let id = req.params.id;
+
     fs.readFile(global.fileName, "utf8", (err, data) => {
-        if (!err) {
+        try {
+            if (err) throw err;
+
+            let id = req.params.id;
             let json = JSON.parse(data);
-           const account = json.accounts.find(account=>{
-                return account.id === parseInt(id);
+            const account = json.accounts.find(account => account.id === parseInt(id,10));
+
+            if (account) {
+                res.send(account);
+            } else {
+                res.end();
+            }
+
+        } catch (err) {
+            res.status(400).send({ error: err.message });
+        };
+    });
+});
+
+router.delete("/:id",(req,res)=>{
+    fs.readFile(global.fileName,"utf8",(err,data)=>{
+        try {
+            if(err) throw err;
+            let id = req.params.id;
+            let json = JSON.parse(data);
+            let accounts = json.accounts.filter(account=> account.id !== parseInt(id,10));
+            json.accounts = accounts;
+
+            fs.writeFile(global.fileName, JSON.stringify(json), err => {
+                if (err) {
+                    res.status(400).send({ error: err.message });
+                } else {
+                    res.end();
+                }
             });
-            res.send(account);
-        } else {
-            res.send("Nao encontrado");
+        } catch (err) {
+            res.send("erro ao deletar")
         }
     });
 });
